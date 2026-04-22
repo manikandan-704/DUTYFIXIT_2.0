@@ -1,14 +1,8 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import api, { setAccessToken } from '../utils/api';
 import Toastify from 'toastify-js';
 import "toastify-js/src/toastify.css";
-
-// Create an API instance pointing to backend (same domain, different port if in dev)
-// By default, since backend is running concurrently, we'll hit absolute URL or configure proxy
-const api = axios.create({
-  baseURL: '/api'
-});
 
 const Login = () => {
   const [isLoginMode, setIsLoginMode] = useState(true);
@@ -75,7 +69,7 @@ const Login = () => {
           })
         };
 
-        const { data } = await api.post('/auth/register', payload);
+        await api.post('/auth/register', payload);
         showToast('Registration successful! Please login.', 'success');
         setIsLoginMode(true);
 
@@ -86,6 +80,11 @@ const Login = () => {
           password: formData.password,
           role: currentRole
         });
+
+        // Store access token in memory (NOT localStorage)
+        if (data.accessToken) {
+          setAccessToken(data.accessToken);
+        }
 
         const user = data.user;
         localStorage.setItem('userEmail', user.email);
@@ -109,7 +108,7 @@ const Login = () => {
         }, 1000);
       }
     } catch (err) {
-      const msg = err.response?.data?.msg || err.message;
+      const msg = err.response?.data?.msg || err.response?.data?.message || err.message;
       setError(msg);
       showToast(msg, 'error');
     }

@@ -1,12 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import axios from 'axios';
+import api from '../utils/api';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import Toastify from 'toastify-js';
 import "toastify-js/src/toastify.css";
-
-const api = axios.create({ baseURL: '/api' });
 
 const BookingPage = () => {
     const navigate = useNavigate();
