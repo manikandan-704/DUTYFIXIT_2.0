@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import api, { clearAccessToken } from '../utils/api';
 
 const Navbar = ({ role = 'client' }) => {
   const navigate = useNavigate();
@@ -14,9 +15,17 @@ const Navbar = ({ role = 'client' }) => {
     setMobileMenuOpen(!mobileMenuOpen);
   };
 
-  const handleLogout = () => {
-    localStorage.clear();
-    navigate('/login');
+  const handleLogout = async () => {
+    try {
+      // Tell the server to invalidate the refresh token cookie
+      await api.post('/auth/logout');
+    } catch {
+      // Proceed with local logout even if server call fails
+    } finally {
+      clearAccessToken();
+      localStorage.clear();
+      navigate('/login');
+    }
   };
 
   const isWorker = role === 'worker';
@@ -25,7 +34,6 @@ const Navbar = ({ role = 'client' }) => {
   return (
     <header className={`header ${role === 'worker' ? 'worker-header' : 'client-header'}`}>
       <div className="logo-container" onClick={() => navigate(logoHref)}>
-        {/* We use either the icon or image depending on the role style. Usually both had the img in the HTML but ClientPage had an icon */}
         <i className="fas fa-tools logo-icon" style={{marginRight: '8px', color: '#1e293b', fontSize: '1.5rem'}}></i>
         <span className="logo-text" style={{fontWeight: 700, fontSize: '1.25rem', color: '#1e293b'}}>DutyFix IT</span>
       </div>
