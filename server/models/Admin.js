@@ -29,11 +29,10 @@ const AdminSchema = new mongoose.Schema({
 });
 
 // Hash password before saving (only if modified)
-AdminSchema.pre('save', async function (next) {
-    if (!this.isModified('password')) return next();
+AdminSchema.pre('save', async function () {
+    if (!this.isModified('password')) return;
     const salt = await bcrypt.genSalt(10);
     this.password = await bcrypt.hash(this.password, salt);
-    next();
 });
 
 // Compare submitted password against stored hash
