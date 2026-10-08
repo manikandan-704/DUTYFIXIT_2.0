@@ -1,0 +1,38 @@
+@layer components {
+  /* Toastify overrides */
+  .Toastify__toast-container {
+    width: auto;
+    max-width: 400px;
+  }
+
+  .Toastify__toast {
+    font-family: var(--font-body);
+    border-radius: var(--radius-sm);
+    box-shadow: var(--shadow-hard);
+    border: var(--border-thin);
+    padding: var(--space-4);
+    margin-bottom: var(--space-4);
+  }
+
+  .Toastify__toast--success {
+    background-color: var(--tint-accepted);
+    color: var(--moss-600);
+    border-color: var(--moss-600);
+  }
+
+  .Toastify__toast--error {
+    background-color: var(--tint-rejected);
+    color: var(--clay-600);
+    border-color: var(--clay-600);
+  }
+
+  .Toastify__toast--info {
+    background-color: var(--surface);
+    color: var(--ink);
+  }
+
+  .Toastify__progress-bar {
+    background-color: currentColor;
+    opacity: 0.2;
+  }
+}

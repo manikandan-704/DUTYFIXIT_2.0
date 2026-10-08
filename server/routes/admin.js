@@ -1,20 +1,19 @@
 const express = require('express');
 const router = express.Router();
-const Client = require('../models/Client');
-const Worker = require('../models/Worker');
+const User = require('../models/User');
 const Booking = require('../models/Booking');
 const VerificationRequest = require('../models/VerificationRequest');
 
-// GET /api/admin/stats — Dashboard KPIs (all parallel, no sort needed)
+// GET /api/admin/stats — Dashboard KPIs
 router.get('/stats', async (req, res) => {
     try {
         const [totalBookings, pendingBookings, completedBookings, totalWorkers, verifiedWorkers, totalCustomers, pendingVerifications] = await Promise.all([
             Booking.countDocuments(),
             Booking.countDocuments({ status: 'Pending' }),
             Booking.countDocuments({ status: 'Completed' }),
-            Worker.countDocuments(),
-            Worker.countDocuments({ isVerified: true }),
-            Client.countDocuments(),
+            User.countDocuments({ role: 'professional' }),
+            User.countDocuments({ role: 'professional', isVerified: true }),
+            User.countDocuments({ role: 'client' }),
             VerificationRequest.countDocuments({ status: 'Pending' })
         ]);
 
@@ -24,13 +23,11 @@ router.get('/stats', async (req, res) => {
     }
 });
 
-// GET /api/admin/customers — All clients with booking counts (BULK, no N+1)
+// GET /api/admin/customers — All clients with booking counts
 router.get('/customers', async (req, res) => {
     try {
-        // 1. Fetch all clients (no password, no sort on large set — use lean)
-        const clients = await Client.find().select('-password').lean();
+        const clients = await User.find({ role: 'client' }).select('-password').lean();
 
-        // 2. Single aggregation: booking count + last service per email
         const bookingStats = await Booking.aggregate([
             { $sort: { createdAt: -1 } },
             { $group: {
@@ -41,11 +38,9 @@ router.get('/customers', async (req, res) => {
             }}
         ]).allowDiskUse(true);
 
-        // Build a lookup map
         const statsMap = {};
         bookingStats.forEach(s => { statsMap[s._id] = s; });
 
-        // 3. Merge in O(n) — no per-client DB calls
         const enriched = clients.map(c => ({
             ...c,
             bookingCount: statsMap[c.email]?.bookingCount || 0,
@@ -53,7 +48,6 @@ router.get('/customers', async (req, res) => {
             lastBookingDate: statsMap[c.email]?.lastBookingDate || null,
         }));
 
-        // Sort in JS (faster than MongoDB sort on unindexed field for this size)
         enriched.sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
 
         res.json(enriched);
@@ -62,20 +56,17 @@ router.get('/customers', async (req, res) => {
     }
 });
 
-// GET /api/admin/workers — All workers enriched (BULK, no N+1)
+// GET /api/admin/workers — All workers enriched
 router.get('/workers', async (req, res) => {
     try {
-        // 1. All workers (no password)
-        const workers = await Worker.find().select('-password').lean();
+        const workers = await User.find({ role: 'professional' }).select('-password').lean();
 
-        // 2. All verification requests — select only needed fields (NO Base64 photo)
         const verReqs = await VerificationRequest.find()
             .select('email profession city status certificateData profilePhotoData')
             .lean();
         const verMap = {};
         verReqs.forEach(v => { verMap[v.email] = v; });
 
-        // 3. Aggregation: completed jobs + avg rating per worker in one pass
         const workerStats = await Booking.aggregate([
             { $match: { status: 'Completed' } },
             { $group: {
@@ -89,7 +80,6 @@ router.get('/workers', async (req, res) => {
         const wStatsMap = {};
         workerStats.forEach(s => { wStatsMap[s._id] = s; });
 
-        // 4. Merge in O(n)
         const enriched = workers.map(w => {
             const ver = verMap[w.email];
             const st = wStatsMap[w.workerId] || {};
@@ -117,7 +107,7 @@ router.get('/workers', async (req, res) => {
     }
 });
 
-// GET /api/admin/reviews — Bookings with ratings (no enrichment needed)
+// GET /api/admin/reviews — Bookings with ratings
 router.get('/reviews', async (req, res) => {
     try {
         const reviews = await Booking.find(
@@ -136,7 +126,7 @@ router.get('/reviews', async (req, res) => {
 // DELETE /api/admin/customers/:id
 router.delete('/customers/:id', async (req, res) => {
     try {
-        await Client.findByIdAndDelete(req.params.id);
+        await User.findOneAndDelete({ _id: req.params.id, role: 'client' });
         res.json({ message: 'Customer deleted' });
     } catch (err) {
         res.status(500).json({ message: 'Server Error', error: err.message });
@@ -146,7 +136,7 @@ router.delete('/customers/:id', async (req, res) => {
 // DELETE /api/admin/workers/:id
 router.delete('/workers/:id', async (req, res) => {
     try {
-        await Worker.findByIdAndDelete(req.params.id);
+        await User.findOneAndDelete({ _id: req.params.id, role: 'professional' });
         res.json({ message: 'Worker deleted' });
     } catch (err) {
         res.status(500).json({ message: 'Server Error', error: err.message });

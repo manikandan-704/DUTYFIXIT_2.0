@@ -1,0 +1,29 @@
+@layer pages {
+  .verify-layout {
+    max-width: 600px;
+    margin: 0 auto;
+    background-color: var(--surface);
+    border: var(--border-thin);
+    padding: var(--space-6);
+  }
+
+  .verify-status-banner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--space-4);
+    background-color: var(--tint-pending);
+    border: 1px dashed var(--turmeric-500);
+    margin-bottom: var(--space-6);
+  }
+
+  .verify-status-banner--approved {
+    background-color: var(--tint-accepted);
+    border-color: var(--moss-600);
+  }
+
+  .verify-status-banner--rejected {
+    background-color: var(--tint-rejected);
+    border-color: var(--clay-600);
+  }
+}

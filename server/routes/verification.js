@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const VerificationRequest = require('../models/VerificationRequest');
-const Worker = require('../models/Worker');
+const User = require('../models/User');
 
 // @route   POST /api/verification
 // @desc    Submit a new verification request
@@ -61,7 +61,7 @@ router.get('/', async (req, res) => {
         const approvedEmails = requests.filter(r => r.status === 'Approved').map(r => r.email);
         const workerMap = {};
         if (approvedEmails.length > 0) {
-            const workers = await Worker.find({ email: { $in: approvedEmails } })
+            const workers = await User.find({ email: { $in: approvedEmails }, role: 'professional' })
                 .select('email rating jobsCompleted')
                 .lean();
             workers.forEach(w => { workerMap[w.email] = w; });
@@ -101,7 +101,7 @@ router.put('/:id', async (req, res) => {
         await request.save();
 
         if (status === 'Approved') {
-            const worker = await Worker.findOne({ email: request.email });
+            const worker = await User.findOne({ email: request.email, role: 'professional' });
             if (worker) {
                 worker.isVerified = true;
                 worker.verificationStatus = 'approved';
@@ -111,7 +111,7 @@ router.put('/:id', async (req, res) => {
                 await worker.save();
             }
         } else if (status === 'Rejected') {
-            const worker = await Worker.findOne({ email: request.email });
+            const worker = await User.findOne({ email: request.email, role: 'professional' });
             if (worker) {
                 worker.verificationStatus = 'rejected';
                 await worker.save();

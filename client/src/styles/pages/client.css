@@ -1,0 +1,101 @@
+@layer pages {
+  /* Client Home / Category Browser */
+  .category-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--space-4);
+    margin-top: var(--space-6);
+  }
+
+  @media (min-width: 640px) {
+    .category-grid {
+      grid-template-columns: repeat(3, 1fr);
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .category-grid {
+      grid-template-columns: repeat(5, 1fr);
+    }
+  }
+
+  .category-tile {
+    background-color: var(--surface);
+    border: var(--border-thin);
+    border-radius: var(--radius-md);
+    padding: var(--space-6) var(--space-4);
+    text-align: center;
+    transition: transform var(--duration-fast), box-shadow var(--duration-fast);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-4);
+    aspect-ratio: 1;
+  }
+
+  .category-tile:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-hard);
+  }
+
+  .category-tile__icon {
+    font-size: 2rem;
+    color: var(--teal-900);
+  }
+
+  .category-tile__name {
+    font-weight: 600;
+    font-size: 0.875rem;
+    color: var(--ink);
+  }
+
+  /* My Bookings Page */
+  .tickets-grid {
+    display: grid;
+    gap: var(--space-6);
+    margin-top: var(--space-6);
+  }
+
+  @media (min-width: 768px) {
+    .tickets-grid {
+      grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+    }
+  }
+
+  .filter-chips {
+    display: flex;
+    gap: var(--space-2);
+    overflow-x: auto;
+    padding-bottom: var(--space-2);
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  .filter-chips::-webkit-scrollbar {
+    display: none;
+  }
+
+  .chip {
+    padding: var(--space-2) var(--space-4);
+    background-color: var(--surface);
+    border: var(--border-thin);
+    border-radius: var(--radius-pill);
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--ink-soft);
+    white-space: nowrap;
+    cursor: pointer;
+    transition: all var(--duration-fast);
+  }
+
+  .chip:hover {
+    background-color: var(--line);
+  }
+
+  .chip--active {
+    background-color: var(--teal-900);
+    color: var(--paper);
+    border-color: var(--teal-900);
+  }
+}

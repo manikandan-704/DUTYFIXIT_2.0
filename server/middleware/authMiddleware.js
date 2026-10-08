@@ -1,7 +1,5 @@
 const jwt = require('jsonwebtoken');
-const Client = require('../models/Client');
-const Worker = require('../models/Worker');
-const Admin = require('../models/Admin');
+const User = require('../models/User');
 
 /**
  * protect — Verifies the Bearer access token from Authorization header.

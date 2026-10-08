@@ -11,11 +11,11 @@ const toast = (text, bg = '#10b981') =>
 const StatusBadge = ({ status }) => {
     const map = {
         Pending: 'pending', pending: 'pending',
-        Approved: 'approved', approved: 'approved', Accepted: 'approved', accepted: 'approved',
+        Approved: 'accepted', approved: 'accepted', Accepted: 'accepted', accepted: 'accepted',
         Rejected: 'rejected', rejected: 'rejected', Cancelled: 'rejected', cancelled: 'rejected',
         Completed: 'completed', completed: 'completed',
     };
-    return <span className={`status-badge ${map[status] || 'pending'}`}>{status}</span>;
+    return <span className={`badge badge--${map[status] || 'pending'}`}>{status}</span>;
 };
 
 const Avatar = ({ name, photo, size = 32 }) => (
@@ -310,7 +310,7 @@ const AdminPage = () => {
                                             {stats.pendingVerifications} worker verification{stats.pendingVerifications > 1 ? 's' : ''} awaiting review
                                         </span>
                                     </div>
-                                    <button className="btn btn-primary" style={{ padding: '0.4rem 1rem', fontSize: '0.8rem' }}
+                                    <button className="btn btn--primary" style={{ padding: '0.4rem 1rem', fontSize: '0.8rem' }}
                                         onClick={() => setActiveTab('workers')}>
                                         Review Now
                                     </button>

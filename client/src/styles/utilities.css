@@ -1,0 +1,46 @@
+@layer utilities {
+  .u-mono { font-family: var(--font-mono); }
+  .u-text-center { text-align: center; }
+  
+  /* Spacing */
+  .u-mb-2 { margin-bottom: var(--space-2); }
+  .u-mb-4 { margin-bottom: var(--space-4); }
+  .u-mb-6 { margin-bottom: var(--space-6); }
+  .u-mb-8 { margin-bottom: var(--space-8); }
+  .u-mb-12 { margin-bottom: var(--space-12); }
+  .u-mt-auto { margin-top: auto; }
+  
+  /* Accessibility */
+  .u-visually-hidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border-width: 0;
+  }
+
+  /* Ruler tick pattern (Signature Motif 2) */
+  .u-ruler-ticks {
+    background-image: repeating-linear-gradient(
+      to right,
+      var(--line) 0,
+      var(--line) 1px,
+      transparent 1px,
+      transparent 8px
+    );
+    height: 6px;
+    width: 100%;
+  }
+
+  .u-blueprint-bg {
+    background-color: var(--teal-900);
+    background-image: 
+      linear-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
+    background-size: 20px 20px;
+  }
+}

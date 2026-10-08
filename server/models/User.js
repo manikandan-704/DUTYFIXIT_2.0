@@ -53,7 +53,38 @@ const UserSchema = new mongoose.Schema({
     createdAt: {
         type: Date,
         default: Date.now
+    },
+    // Missing fields from Worker schema
+    profilePic: {
+        type: String
+    },
+    rating: {
+        type: Number,
+        default: 5.0
+    },
+    jobsCompleted: {
+        type: Number,
+        default: 0
+    },
+    workerId: {
+        type: String,
+        unique: true,
+        sparse: true
     }
 });
+
+// Hash password before saving (only if modified)
+UserSchema.pre('save', async function () {
+    if (!this.isModified('password')) return;
+    const bcrypt = require('bcryptjs');
+    const salt = await bcrypt.genSalt(10);
+    this.password = await bcrypt.hash(this.password, salt);
+});
+
+// Compare submitted password against stored hash
+UserSchema.methods.comparePassword = async function (candidatePassword) {
+    const bcrypt = require('bcryptjs');
+    return bcrypt.compare(candidatePassword, this.password);
+};
 
 module.exports = mongoose.model('User', UserSchema);

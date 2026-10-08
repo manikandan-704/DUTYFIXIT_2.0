@@ -1,33 +1,17 @@
 const express = require('express');
 const router = express.Router();
-const Client = require('../models/Client');
-const Worker = require('../models/Worker');
-const Admin = require('../models/Admin');
-
-// Helper to find user across collections
-async function findUserInCollections(id) {
-    let user = await Client.findById(id).select('-password');
-    if (user) return { user, model: Client, type: 'Client' };
-
-    user = await Worker.findById(id).select('-password');
-    if (user) return { user, model: Worker, type: 'Worker' };
-
-    user = await Admin.findById(id).select('-password');
-    if (user) return { user, model: Admin, type: 'Admin' };
-
-    return null;
-}
+const User = require('../models/User');
 
 // @route   GET /api/profile/:id
 // @desc    Get user profile by ID
 // @access  Public
 router.get('/:id', async (req, res) => {
     try {
-        const result = await findUserInCollections(req.params.id);
-        if (!result) {
+        const user = await User.findById(req.params.id).select('-password');
+        if (!user) {
             return res.status(404).json({ msg: 'User not found' });
         }
-        res.json(result.user);
+        res.json(user);
     } catch (err) {
         console.error(err.message);
         if (err.kind === 'ObjectId') {
@@ -43,48 +27,28 @@ router.get('/:id', async (req, res) => {
 router.put('/:id', async (req, res) => {
     const { name, mobile, dob, gender, address, profession, experience, profilePic } = req.body;
 
-
-    // fields common to all
-    const commonFields = {};
-    if (name) commonFields.name = name;
-    if (mobile) commonFields.mobile = mobile;
-
-    // Client specific
-    const clientFields = {};
-    if (dob) clientFields.dob = dob;
-    if (gender) clientFields.gender = gender;
-    if (address) clientFields.address = address;
-
-    // Worker specific
-    const workerFields = {};
-    if (profession) workerFields.profession = profession;
-    if (experience) workerFields.experience = experience;
-    if (profilePic !== undefined) workerFields.profilePic = profilePic; // Allow setting to null/string
-
+    const updateData = {};
+    if (name !== undefined) updateData.name = name;
+    if (mobile !== undefined) updateData.mobile = mobile;
+    if (dob !== undefined) updateData.dob = dob;
+    if (gender !== undefined) updateData.gender = gender;
+    if (address !== undefined) updateData.address = address;
+    if (profession !== undefined) updateData.profession = profession;
+    if (experience !== undefined) updateData.experience = experience;
+    if (profilePic !== undefined) updateData.profilePic = profilePic;
 
     try {
-        const result = await findUserInCollections(req.params.id);
-
-        if (!result) {
-            return res.status(404).json({ msg: 'User not found' });
-        }
-
-        const { model, type } = result;
-        let updateData = { ...commonFields };
-
-        if (type === 'Client') {
-            updateData = { ...updateData, ...clientFields };
-        } else if (type === 'Worker') {
-            updateData = { ...updateData, ...workerFields };
-        }
-
-        const updatedUser = await model.findByIdAndUpdate(
+        const user = await User.findByIdAndUpdate(
             req.params.id,
             { $set: updateData },
             { new: true }
         ).select('-password');
 
-        res.json(updatedUser);
+        if (!user) {
+            return res.status(404).json({ msg: 'User not found' });
+        }
+
+        res.json(user);
 
     } catch (err) {
         console.error(err.message);
@@ -97,13 +61,11 @@ router.put('/:id', async (req, res) => {
 // @access  Public
 router.delete('/:id', async (req, res) => {
     try {
-        const result = await findUserInCollections(req.params.id);
+        const user = await User.findByIdAndDelete(req.params.id);
 
-        if (!result) {
+        if (!user) {
             return res.status(404).json({ msg: 'User not found' });
         }
-
-        await result.model.findByIdAndDelete(req.params.id);
 
         res.json({ msg: 'User deleted' });
     } catch (err) {

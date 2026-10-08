@@ -8,29 +8,17 @@ const Login = () => {
   const [isLoginMode, setIsLoginMode] = useState(true);
   const [currentRole, setCurrentRole] = useState('client');
   const [formData, setFormData] = useState({
-    fullName: '',
-    profession: '',
-    email: '',
-    mobile: '',
-    password: '',
-    experience: ''
+    fullName: '', profession: '', email: '', mobile: '', password: '', experience: ''
   });
   const [error, setError] = useState('');
   
   const navigate = useNavigate();
 
-  const handleInputChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
-  };
+  const handleInputChange = (e) => setFormData({ ...formData, [e.target.name]: e.target.value });
 
   const toggleMode = () => {
     setIsLoginMode(!isLoginMode);
     if (!isLoginMode && currentRole === 'admin') setCurrentRole('client');
-    setError('');
-  };
-
-  const handleRoleChange = (role) => {
-    setCurrentRole(role);
     setError('');
   };
 
@@ -41,12 +29,7 @@ const Login = () => {
       close: true,
       gravity: "top", 
       position: "right",
-      style: {
-        background: type === 'success' ? '#10b981' : '#ef4444',
-        borderRadius: '8px',
-        color: 'white',
-        fontWeight: '600'
-      }
+      className: type === 'success' ? 'Toastify__toast--success' : 'Toastify__toast--error'
     }).showToast();
   };
 
@@ -56,7 +39,6 @@ const Login = () => {
 
     try {
       if (!isLoginMode) {
-        // Register Mode
         const payload = {
           name: formData.fullName,
           email: formData.email,
@@ -74,17 +56,13 @@ const Login = () => {
         setIsLoginMode(true);
 
       } else {
-        // Login Mode
         const { data } = await api.post('/auth/login', {
           email: formData.email,
           password: formData.password,
           role: currentRole
         });
 
-        // Store access token in memory (NOT localStorage)
-        if (data.accessToken) {
-          setAccessToken(data.accessToken);
-        }
+        if (data.accessToken) setAccessToken(data.accessToken);
 
         const user = data.user;
         localStorage.setItem('userEmail', user.email);
@@ -99,7 +77,7 @@ const Login = () => {
           if (user.workerId) localStorage.setItem('workerId', user.workerId);
         }
 
-        showToast(`Login successful! Welcome back, ${user.name}.`, 'success');
+        showToast(`Welcome back, ${user.name}.`, 'success');
 
         setTimeout(() => {
           if (user.role === 'professional') navigate('/worker');
@@ -115,163 +93,110 @@ const Login = () => {
   };
 
   return (
-    <>
-      <header className="header">
-        <div className="logo-container" onClick={() => navigate('/client')}>
-          <img src="/images/logo.jpg" alt="DutyFix IT" className="logo-image" />
+    <div className="auth-layout">
+      {/* Brand Panel */}
+      <aside className="auth-brand">
+        <div className="auth-brand__logo">
+          <i className="fas fa-tools"></i> DutyFix IT
         </div>
-      </header>
+        <h1 className="auth-brand__quote">
+          {isLoginMode ? "Welcome back to the workbench." : "Start building your reputation."}
+        </h1>
+        <p style={{marginTop: '24px', opacity: 0.8, maxWidth: '400px'}}>
+          The premier network for verified tradespeople and households.
+        </p>
+      </aside>
 
-      <main className="auth-main">
-        <div className="auth-card">
-          <div className="auth-icon-header">
-            <i className={isLoginMode ? "fas fa-tools" : "fas fa-user-plus"}></i>
-          </div>
-
+      {/* Form Panel */}
+      <main className="auth-form-panel">
+        <div className="auth-form-container">
           <h2 className="auth-title">
-            {isLoginMode ? "Login to your account" : "Join DutyFix IT today"}
+            {isLoginMode ? "Login" : "Register"}
           </h2>
 
-          <div className="role-switch-container">
-            <button 
-              type="button"
-              className={`role-btn ${currentRole === 'client' ? 'active' : ''}`}
-              onClick={() => handleRoleChange('client')}
-            >
-              Client
-            </button>
-            <button 
-              type="button"
-              className={`role-btn ${currentRole === 'professional' ? 'active' : ''}`}
-              onClick={() => handleRoleChange('professional')}
-            >
-              Professional
-            </button>
+          <div className="segmented-control u-mb-6">
+            <label>
+              <input type="radio" name="role" checked={currentRole === 'client'} onChange={() => {setCurrentRole('client'); setError('');}} />
+              <span>Client</span>
+            </label>
+            <label>
+              <input type="radio" name="role" checked={currentRole === 'professional'} onChange={() => {setCurrentRole('professional'); setError('');}} />
+              <span>Professional</span>
+            </label>
             {isLoginMode && (
-              <button 
-                type="button"
-                className={`role-btn ${currentRole === 'admin' ? 'active' : ''}`}
-                onClick={() => handleRoleChange('admin')}
-              >
-                Admin
-              </button>
+              <label>
+                <input type="radio" name="role" checked={currentRole === 'admin'} onChange={() => {setCurrentRole('admin'); setError('');}} />
+                <span>Admin</span>
+              </label>
             )}
           </div>
+
+          {error && <div className="auth-error">{error}</div>}
 
           <form onSubmit={handleSubmit}>
             {!isLoginMode && (
-              <div className="input-group">
-                <i className="fas fa-user input-icon"></i>
-                <input 
-                  type="text" 
-                  name="fullName"
-                  className="form-input" 
-                  placeholder="Full Name" 
-                  required 
-                  value={formData.fullName}
-                  onChange={handleInputChange}
-                />
+              <div className="form-group">
+                <label className="form-label">Full Name</label>
+                <input type="text" name="fullName" className="form-input" required value={formData.fullName} onChange={handleInputChange} />
               </div>
             )}
 
             {!isLoginMode && currentRole === 'professional' && (
-              <div className="input-group">
-                <i className="fas fa-briefcase input-icon"></i>
-                <select 
-                  name="profession"
-                  className="form-input select-custom" 
-                  required 
-                  value={formData.profession}
-                  onChange={handleInputChange}
-                >
-                  <option value="" disabled>Select Profession</option>
-                  <option value="Plumbing">Plumbing</option>
-                  <option value="Electrical">Electrical</option>
-                  <option value="Cleaning">Cleaning</option>
-                  <option value="Painting">Painting</option>
-                  <option value="Carpentry">Carpentry</option>
-                  <option value="AC Service">AC Service</option>
-                  <option value="CCTV Service">CCTV Service</option>
-                  <option value="Interior Design">Interior Design</option>
-                  <option value="Civil Service">Civil Service</option>
-                  <option value="RO Purifier">RO Purifier</option>
-                </select>
+              <div className="auth-professional-fields">
+                <div className="form-group">
+                  <label className="form-label">Profession</label>
+                  <select name="profession" className="form-select" required value={formData.profession} onChange={handleInputChange}>
+                    <option value="" disabled>Select Profession</option>
+                    <option value="Plumbing">Plumbing</option>
+                    <option value="Electrical">Electrical</option>
+                    <option value="Cleaning">Cleaning</option>
+                    <option value="Painting">Painting</option>
+                    <option value="Carpentry">Carpentry</option>
+                    <option value="AC Service">AC Service</option>
+                    <option value="CCTV Service">CCTV Service</option>
+                    <option value="Interior Design">Interior Design</option>
+                    <option value="Civil Service">Civil Service</option>
+                    <option value="RO Purifier">RO Purifier</option>
+                  </select>
+                </div>
+                <div className="form-group">
+                  <label className="form-label">Experience</label>
+                  <input type="text" name="experience" className="form-input" placeholder="e.g. 5 years" value={formData.experience} onChange={handleInputChange} />
+                </div>
               </div>
             )}
 
-            <div className="input-group">
-              <i className="fas fa-envelope input-icon"></i>
-              <input 
-                type="text" 
-                name="email"
-                className="form-input" 
-                placeholder="Email / Username" 
-                required 
-                value={formData.email}
-                onChange={handleInputChange}
-              />
+            <div className="form-group">
+              <label className="form-label">Email</label>
+              <input type="text" name="email" className="form-input" required value={formData.email} onChange={handleInputChange} />
             </div>
 
             {!isLoginMode && (
-              <div className="input-group">
-                <i className="fas fa-phone input-icon"></i>
-                <input 
-                  type="tel" 
-                  name="mobile"
-                  className="form-input" 
-                  placeholder="Mobile Number" 
-                  required
-                  value={formData.mobile}
-                  onChange={handleInputChange}
-                />
+              <div className="form-group">
+                <label className="form-label">Mobile Number</label>
+                <input type="tel" name="mobile" className="form-input" required value={formData.mobile} onChange={handleInputChange} />
               </div>
             )}
 
-            <div className="input-group">
-              <i className="fas fa-lock input-icon"></i>
-              <input 
-                type="password" 
-                name="password"
-                className="form-input" 
-                placeholder="Password" 
-                required 
-                value={formData.password}
-                onChange={handleInputChange}
-              />
+            <div className="form-group u-mb-8">
+              <label className="form-label">Password</label>
+              <input type="password" name="password" className="form-input" required value={formData.password} onChange={handleInputChange} />
             </div>
 
-            {!isLoginMode && currentRole === 'professional' && (
-              <div className="input-group">
-                <i className="fas fa-medal input-icon"></i>
-                <input 
-                  type="text" 
-                  name="experience"
-                  className="form-input" 
-                  placeholder="Experience (e.g. 5 years)" 
-                  value={formData.experience}
-                  onChange={handleInputChange}
-                />
-              </div>
-            )}
-
-            {error && <div style={{ color: '#dc2626', marginTop: '10px', textAlign: 'center', fontSize: '0.9rem' }}>{error}</div>}
-
-            <button type="submit" className="submit-btn" style={{marginTop: '15px'}}>
-              {isLoginMode ? 'Login' : `Register as ${currentRole.charAt(0).toUpperCase() + currentRole.slice(1)}`}
+            <button type="submit" className="btn btn--primary" style={{width: '100%'}}>
+              {isLoginMode ? 'Sign In' : 'Create Account'}
             </button>
           </form>
 
-          <div className="toggle-auth-mode" style={{marginTop: '15px'}}>
-            <p>
-              {isLoginMode ? "New to DutyFix? " : "Already have an account? "}
-              <span className="toggle-link font-bold-pointer" onClick={toggleMode} style={{color:'#0f172a', fontWeight:700, cursor:'pointer'}}>
-                {isLoginMode ? "Sign Up" : "Login"}
-              </span>
-            </p>
+          <div className="auth-toggle">
+            {isLoginMode ? "New to DutyFix? " : "Already have an account? "}
+            <button type="button" onClick={toggleMode}>
+              {isLoginMode ? "Sign Up" : "Login"}
+            </button>
           </div>
         </div>
       </main>
-    </>
+    </div>
   );
 };
 

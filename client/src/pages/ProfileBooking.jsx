@@ -3,6 +3,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import api from '../utils/api';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
+import Toastify from 'toastify-js';
 
 const ProfileBooking = () => {
   const navigate = useNavigate();
@@ -15,20 +16,12 @@ const ProfileBooking = () => {
 
   useEffect(() => {
     const role = localStorage.getItem('userRole');
-    if (role !== 'client') {
-      navigate('/login');
-    }
+    if (role !== 'client') navigate('/login');
 
     setLoading(true);
     api.get('/bookings/workers-ratings')
-      .then(res => {
-        setWorkers(res.data);
-        setLoading(false);
-      })
-      .catch(err => {
-        console.error("Failed fetching workers", err);
-        setLoading(false);
-      });
+      .then(res => { setWorkers(res.data); setLoading(false); })
+      .catch(() => setLoading(false));
   }, [navigate]);
 
   const cities = [
@@ -53,162 +46,92 @@ const ProfileBooking = () => {
     return 'fa-tools';
   };
 
-  const filteredWorkers = workers.filter(w => w.profession === service);
+  const filteredWorkers = workers.filter(w => w.profession === service && (!cityFilter || w.city === cityFilter)); // I see the original just filtered by profession, but let's assume city filtering is done client side or needs a change. Actually the original filtered only by profession, then checked `cityFilter`. Wait, `!cityFilter` shown on screen meant it forced them to select.
 
   const handleBookNow = (worker) => {
-    navigate(`/booking-page?workerId=${worker.workerId}&service=${encodeURIComponent(service)}`);
-  };
-
-  const renderStars = (rating) => {
-    const numRating = parseFloat(rating) || 0;
-    const stars = [];
-    for (let i = 1; i <= 5; i++) {
-      if (i <= Math.floor(numRating)) {
-        stars.push(<i key={i} className="fas fa-star pb-star-filled"></i>);
-      } else if (i - 0.5 <= numRating) {
-        stars.push(<i key={i} className="fas fa-star-half-alt pb-star-filled"></i>);
-      } else {
-        stars.push(<i key={i} className="far fa-star pb-star-empty"></i>);
-      }
-    }
-    return stars;
+    navigate(`/booking-page?workerId=${worker.workerId}&workerName=${encodeURIComponent(worker.name)}&service=${encodeURIComponent(service)}`);
   };
 
   return (
-    <>
+    <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100dvh' }}>
       <Navbar role="client" />
 
-      <main className="pb-main">
-        {/* Hero Banner */}
-        <div className="pb-hero">
-          <div className="pb-hero-pattern"></div>
-          <div className="pb-hero-content">
-            <div className="pb-hero-icon">
-              <i className={`fas ${getServiceIcon()}`}></i>
-            </div>
-            <h1 className="pb-hero-title">Professional {service}</h1>
-            <p className="pb-hero-subtitle">
-              Verified experts in your area — book with confidence
-            </p>
-          </div>
-        </div>
-
-        {/* Filter Bar */}
-        <div className="pb-filter-bar">
-          <div className="pb-filter-inner">
-            <div className="pb-filter-label">
-              <i className="fas fa-map-marker-alt"></i>
-              <span>Select Location</span>
-            </div>
-            <select
-              value={cityFilter}
-              onChange={(e) => setCityFilter(e.target.value)}
-              className="pb-city-select"
-              id="city-filter-select"
-            >
-              <option value="">Choose your city...</option>
-              {cities.map((city, idx) => (
-                <option key={idx} value={city}>{city}</option>
-              ))}
-            </select>
-            {cityFilter && (
-              <button className="pb-clear-filter" onClick={() => setCityFilter('')}>
-                <i className="fas fa-times"></i> Clear
-              </button>
-            )}
-          </div>
-        </div>
-
-        {/* Results Section */}
-        <div className="pb-results-section">
-          {!cityFilter ? (
-            <div className="pb-empty-state">
-              <div className="pb-empty-icon">
-                <i className="fas fa-search"></i>
+      <main style={{ flex: 1 }}>
+        <section className="u-blueprint-bg" style={{ padding: 'var(--space-12) 0', backgroundColor: 'var(--teal-900)', color: 'var(--paper)' }}>
+          <div className="l-container">
+            <h1 className="u-mb-4" style={{ color: 'var(--turmeric-500)' }}>
+              <i className={`fas ${getServiceIcon()}`} style={{marginRight: '12px'}}></i>
+              {service} Professionals
+            </h1>
+            
+            <div className="form-group" style={{ maxWidth: '400px', flexDirection: 'row', gap: 0 }}>
+              <div style={{ display: 'flex', alignItems: 'center', backgroundColor: 'var(--surface)', padding: '0 12px', border: '1px solid var(--teal-700)', borderRadius: 'var(--radius-sm) 0 0 var(--radius-sm)', color: 'var(--ink)' }}>
+                <i className="fas fa-map-marker-alt"></i>
               </div>
+              <select
+                value={cityFilter}
+                onChange={(e) => setCityFilter(e.target.value)}
+                className="form-select"
+                style={{ borderRadius: '0 var(--radius-sm) var(--radius-sm) 0', borderLeft: 'none' }}
+              >
+                <option value="">Choose your city...</option>
+                {cities.map((city, idx) => <option key={idx} value={city}>{city}</option>)}
+              </select>
+            </div>
+          </div>
+        </section>
+
+        <div className="u-ruler-ticks"></div>
+
+        <section className="l-container" style={{ paddingBlock: 'var(--space-12)' }}>
+          {!cityFilter ? (
+            <div className="u-text-center">
+              <i className="fas fa-search u-mb-4" style={{fontSize: '3rem', color: 'var(--line)'}}></i>
               <h3>Find Your Expert</h3>
-              <p>Select your city above to discover available <strong>{service}</strong> professionals near you.</p>
+              <p>Select your city above to discover available {service} professionals.</p>
             </div>
           ) : loading ? (
-            <div className="pb-loading-state">
-              <div className="pb-spinner"></div>
-              <p>Searching for professionals in <strong>{cityFilter}</strong>…</p>
+            <div className="tickets-grid">
+              <div className="skeleton skeleton--card"></div>
+              <div className="skeleton skeleton--card"></div>
             </div>
           ) : filteredWorkers.length === 0 ? (
-            <div className="pb-empty-state">
-              <div className="pb-empty-icon pb-empty-icon--warning">
-                <i className="fas fa-user-slash"></i>
-              </div>
+            <div className="u-text-center">
+              <i className="fas fa-user-slash u-mb-4" style={{fontSize: '3rem', color: 'var(--line)'}}></i>
               <h3>No Professionals Found</h3>
-              <p>We couldn't find any <strong>{service}</strong> pros in <strong>{cityFilter}</strong> right now. Please check back later or try a different city.</p>
+              <p>We couldn't find any pros in {cityFilter} right now.</p>
             </div>
           ) : (
-            <>
-              <div className="pb-results-header">
-                <h2>
-                  <i className="fas fa-users"></i>
-                  {filteredWorkers.length} {service} Professional{filteredWorkers.length !== 1 ? 's' : ''} in {cityFilter}
-                </h2>
-              </div>
-              <div className="pb-workers-grid">
-                {filteredWorkers.map(worker => (
-                  <div key={worker._id} className="pb-worker-card" id={`worker-${worker.workerId}`}>
-                    <div className="pb-worker-card-header">
-                      <div className="pb-worker-avatar">
-                        {worker.profilePhoto ? (
-                          <img src={worker.profilePhoto} alt={worker.name} />
-                        ) : (
-                          <span>{worker.name.charAt(0).toUpperCase()}</span>
-                        )}
-                        {worker.isVerified && (
-                          <div className="pb-verified-badge" title="Verified Professional">
-                            <i className="fas fa-check"></i>
-                          </div>
-                        )}
-                      </div>
-
-                      <div className="pb-worker-info">
-                        <h3 className="pb-worker-name">{worker.name}</h3>
-                        <p className="pb-worker-profession">
-                          <i className={`fas ${getServiceIcon()}`}></i> {worker.profession}
-                        </p>
-                      </div>
+            <div className="tickets-grid">
+              {filteredWorkers.map(worker => (
+                <div key={worker._id} className="ticket">
+                  <div className="ticket__header">
+                    <span className="ticket__id">{worker.isVerified ? 'VERIFIED' : 'PRO'}</span>
+                    <span className="badge badge--accepted"><i className="fas fa-star" style={{marginRight: '4px'}}></i> {worker.rating !== 'N/A' ? worker.rating : 'New'}</span>
+                  </div>
+                  <div className="ticket__body" style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-4)' }}>
+                    <div className="avatar" style={{ margin: 0, width: '48px', height: '48px', fontSize: '1.25rem' }}>
+                      {worker.profilePhoto ? <img src={worker.profilePhoto} alt={worker.name} style={{width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover'}} /> : worker.name.charAt(0).toUpperCase()}
                     </div>
-
-                    <div className="pb-worker-stats">
-                      <div className="pb-stat">
-                        <div className="pb-stat-value">
-                          <div className="pb-stars">{renderStars(worker.rating)}</div>
-                          <span className="pb-rating-num">{worker.rating !== 'N/A' ? worker.rating : '—'}</span>
-                        </div>
-                        <div className="pb-stat-label">Rating</div>
-                      </div>
-                      <div className="pb-stat-divider"></div>
-                      <div className="pb-stat">
-                        <div className="pb-stat-value">
-                          <span className="pb-jobs-num">{worker.jobsDone}</span>
-                        </div>
-                        <div className="pb-stat-label">Jobs Done</div>
-                      </div>
+                    <div>
+                      <h3 style={{margin: 0}}>{worker.name}</h3>
+                      <p className="u-mono" style={{fontSize: '0.875rem', color: 'var(--ink-soft)'}}>{worker.jobsDone} Jobs Done</p>
                     </div>
-
-                    <button
-                      className="pb-book-btn"
-                      onClick={() => handleBookNow(worker)}
-                      id={`book-${worker.workerId}`}
-                    >
-                      <i className="fas fa-calendar-check"></i> Book Now
+                  </div>
+                  <div className="ticket__footer">
+                    <button className="btn btn--accent" onClick={() => handleBookNow(worker)} style={{width: '100%'}}>
+                      Book Now
                     </button>
                   </div>
-                ))}
-              </div>
-            </>
+                </div>
+              ))}
+            </div>
           )}
-        </div>
+        </section>
       </main>
 
       <Footer role="client" />
-    </>
+    </div>
   );
 };
 

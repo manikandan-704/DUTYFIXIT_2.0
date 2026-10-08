@@ -7,8 +7,7 @@ require('dotenv').config({ path: require('path').join(__dirname, '../../.env') }
 const mongoose = require('mongoose');
 
 const Booking = require('../models/Booking');
-const Worker = require('../models/Worker');
-const Client = require('../models/Client');
+const User = require('../models/User');
 const VerificationRequest = require('../models/VerificationRequest');
 
 const safe = async (fn, label) => {
@@ -33,12 +32,11 @@ async function createIndexes() {
     await safe(() => Booking.collection.createIndex({ status: 1 }), 'status');
     await safe(() => Booking.collection.createIndex({ rating: 1 }), 'rating');
 
-    console.log('\nWorker indexes:');
-    await safe(() => Worker.collection.createIndex({ createdAt: -1 }), 'createdAt desc');
-    await safe(() => Worker.collection.createIndex({ workerId: 1 }), 'workerId');
-
-    console.log('\nClient indexes:');
-    await safe(() => Client.collection.createIndex({ createdAt: -1 }), 'createdAt desc');
+    console.log('\nUser indexes:');
+    await safe(() => User.collection.createIndex({ createdAt: -1 }), 'createdAt desc');
+    await safe(() => User.collection.createIndex({ workerId: 1 }), 'workerId');
+    await safe(() => User.collection.createIndex({ email: 1 }, { unique: true }), 'email unique');
+    await safe(() => User.collection.createIndex({ role: 1 }), 'role');
 
     console.log('\nVerificationRequest indexes:');
     await safe(() => VerificationRequest.collection.createIndex({ date: -1 }), 'date desc');

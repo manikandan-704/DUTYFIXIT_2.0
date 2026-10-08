@@ -9,9 +9,6 @@ const ClientPage = () => {
 
   const handleSearch = (e) => {
     e.preventDefault();
-    // Logic for search execution
-    console.log("Searching for:", searchQuery);
-    // Maybe filter the grid below
   };
 
   const handleServiceClick = (service) => {
@@ -19,63 +16,65 @@ const ClientPage = () => {
   };
 
   const services = [
-    { name: 'Plumbing', img: '/images/plumbing.jpg' },
-    { name: 'Electrical', img: '/images/electrician.jpg' },
-    { name: 'Cleaning', img: '/images/cleaning.jpg' },
-    { name: 'Painting', img: '/images/painter.jpg' },
-    { name: 'Carpentry', img: '/images/carpenter.jpg' },
-    { name: 'AC Service', img: '/images/ac.jpg' },
-    { name: 'CCTV Service', img: '/images/cctv.jpg' },
-    { name: 'Interior Design', img: '/images/interior.jpg' },
-    { name: 'Civil Service', img: '/images/civil.jpg' },
-    { name: 'RO Purifier', img: '/images/ro.jpg' },
+    { name: 'Plumbing', icon: 'fa-faucet' },
+    { name: 'Electrical', icon: 'fa-bolt' },
+    { name: 'Cleaning', icon: 'fa-broom' },
+    { name: 'Painting', icon: 'fa-paint-roller' },
+    { name: 'Carpentry', icon: 'fa-hammer' },
+    { name: 'AC Service', icon: 'fa-snowflake' },
+    { name: 'CCTV Service', icon: 'fa-video' },
+    { name: 'Interior Design', icon: 'fa-couch' },
+    { name: 'Civil Service', icon: 'fa-hard-hat' },
+    { name: 'RO Purifier', icon: 'fa-tint' },
   ];
 
   return (
-    <>
+    <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100dvh' }}>
       <Navbar role="client" />
 
-      <main className="container-xl">
-        {/* Hero Section */}
-        <section className="client-hero-section">
-          <div className="client-hero-content">
-            <h1 className="client-hero-title">Home services, on demand.</h1>
-            <p className="client-hero-subtitle">Expert professionals for all your home needs.</p>
-
-            <form className="search-container" onSubmit={handleSearch}>
-              <i className="fas fa-search search-icon"></i>
+      <main style={{ flex: 1 }}>
+        <section style={{ padding: 'var(--space-12) 0', backgroundColor: 'var(--teal-900)', color: 'var(--paper)' }} className="u-blueprint-bg">
+          <div className="l-container">
+            <h1 style={{ color: 'var(--turmeric-500)', marginBottom: 'var(--space-4)' }}>What do you need fixing today?</h1>
+            <form className="form-group" style={{ maxWidth: '600px', flexDirection: 'row', gap: 0 }} onSubmit={handleSearch}>
               <input 
                 type="text" 
-                className="search-input" 
+                className="form-input" 
                 placeholder="Search for 'Plumbing', 'Cleaning'..."
+                style={{ borderRadius: 'var(--radius-sm) 0 0 var(--radius-sm)', borderRight: 'none' }}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
+              <button type="submit" className="btn btn--primary" style={{ borderRadius: '0 var(--radius-sm) var(--radius-sm) 0', border: '1px solid var(--teal-700)' }}>
+                <i className="fas fa-search"></i>
+              </button>
             </form>
           </div>
         </section>
 
-        {/* Services Section */}
-        <h2 className="section-title">Home Services</h2>
+        <div className="u-ruler-ticks"></div>
 
-        <div className="client-services-grid">
-          {services
-            .filter(svc => svc.name.toLowerCase().includes(searchQuery.toLowerCase()))
-            .map((svc, index) => (
-            <div 
-              key={index} 
-              className="client-service-card" 
-              onClick={() => handleServiceClick(svc.name)}
-            >
-              <img src={svc.img} alt={svc.name} className="client-service-img" />
-              <div className="client-service-name">{svc.name}</div>
-            </div>
-          ))}
-        </div>
+        <section className="l-container" style={{ paddingBlock: 'var(--space-12)' }}>
+          <h2 className="u-mb-6">Categories</h2>
+          <div className="category-grid">
+            {services
+              .filter(svc => svc.name.toLowerCase().includes(searchQuery.toLowerCase()))
+              .map((svc, index) => (
+              <button 
+                key={index} 
+                className="category-tile" 
+                onClick={() => handleServiceClick(svc.name)}
+              >
+                <i className={`fas ${svc.icon} category-tile__icon`}></i>
+                <div className="category-tile__name">{svc.name}</div>
+              </button>
+            ))}
+          </div>
+        </section>
       </main>
 
       <Footer role="client" />
-    </>
+    </div>
   );
 };
 

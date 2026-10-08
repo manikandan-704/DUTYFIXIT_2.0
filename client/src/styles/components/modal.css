@@ -1,0 +1,59 @@
+@layer components {
+  /* Modal Scrim */
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    background-color: rgba(28, 27, 24, 0.6);
+    backdrop-filter: blur(2px);
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--space-4);
+    /* Basic fade */
+    opacity: 0;
+    animation: fadeIn var(--duration-fast) forwards;
+  }
+
+  /* Modal Content */
+  .modal-content {
+    background-color: var(--surface);
+    width: 100%;
+    max-width: 500px;
+    border: var(--border-thin);
+    box-shadow: var(--shadow-hard);
+    padding: var(--space-6);
+    position: relative;
+    transform: translateY(20px);
+    animation: slideUp var(--duration-base) var(--ease-out) forwards;
+  }
+
+  /* Bottom sheet on mobile */
+  @media (max-width: 767px) {
+    .modal-overlay {
+      align-items: flex-end;
+      padding: 0;
+    }
+    
+    .modal-content {
+      max-width: 100%;
+      border-bottom: none;
+      border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+      padding-bottom: env(safe-area-inset-bottom, var(--space-6));
+    }
+  }
+
+  .modal-close {
+    position: absolute;
+    top: var(--space-4);
+    right: var(--space-4);
+  }
+
+  @keyframes fadeIn {
+    to { opacity: 1; }
+  }
+
+  @keyframes slideUp {
+    to { transform: translateY(0); }
+  }
+}

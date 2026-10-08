@@ -1,0 +1,60 @@
+@layer tokens {
+  :root {
+    /* Colors */
+    --paper: #F5F0E6;
+    --paper-sunk: #EDE6D6;
+    --surface: #FBF8F1;
+    --ink: #1C1B18;
+    --ink-soft: #55524A;
+    --line: #D8CFBB;
+    
+    --teal-900: #0E3B3A;
+    --teal-700: #17615E;
+    --turmeric-500: #E9A21B;
+    --clay-600: #B8472F;
+    --moss-600: #3F7D4E;
+    --slate-blue-600: #2F5D8A;
+
+    /* Status tints */
+    --tint-pending: #FDF3DF;
+    --tint-accepted: #E4F1E8;
+    --tint-completed: #DDF1F0;
+    --tint-rejected: #F7E1DC;
+    --tint-cancelled: #EBEAE6;
+
+    /* Typography */
+    --font-display: "Bricolage Grotesque", system-ui, -apple-system, sans-serif;
+    --font-body: "Instrument Sans", system-ui, -apple-system, sans-serif;
+    --font-mono: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+
+    /* Spacing scale (4px base) */
+    --space-1: 0.25rem;  /* 4px */
+    --space-2: 0.5rem;   /* 8px */
+    --space-3: 0.75rem;  /* 12px */
+    --space-4: 1rem;     /* 16px */
+    --space-6: 1.5rem;   /* 24px */
+    --space-8: 2rem;     /* 32px */
+    --space-12: 3rem;    /* 48px */
+    --space-18: 4.5rem;  /* 72px */
+    --space-28: 7rem;    /* 112px */
+
+    /* Radii */
+    --radius-sm: 4px;
+    --radius-md: 8px;
+    --radius-lg: 12px;
+    --radius-pill: 9999px;
+
+    /* Shadows & Borders */
+    --border-thin: 1px solid var(--line);
+    --shadow-soft: 0 8px 24px -8px rgba(28, 27, 24, 0.1);
+    --shadow-hard: 3px 3px 0 var(--ink);
+    
+    /* Animation */
+    --duration-fast: 150ms;
+    --duration-base: 220ms;
+    --ease-out: cubic-bezier(0.2, 0, 0, 1);
+
+    /* Common layout */
+    --max-w: 1280px;
+  }
+}

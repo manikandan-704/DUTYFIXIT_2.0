@@ -1,0 +1,26 @@
+@layer reset, tokens, base, layout, components, pages, utilities;
+
+@import './reset.css';
+@import './tokens.css';
+@import './base.css';
+@import './layout.css';
+
+@import './components/button.css';
+@import './components/form.css';
+@import './components/badge.css';
+@import './components/ticket.css';
+@import './components/modal.css';
+@import './components/toast.css';
+@import './components/skeleton.css';
+@import './components/nav.css';
+
+@import './pages/landing.css';
+@import './pages/auth.css';
+@import './pages/client.css';
+@import './pages/booking.css';
+@import './pages/worker.css';
+@import './pages/profile.css';
+@import './pages/verify.css';
+@import './pages/admin.css';
+
+@import './utilities.css';

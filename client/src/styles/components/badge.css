@@ -1,0 +1,41 @@
+@layer components {
+  /* Standard Pill Badges */
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 2px 12px;
+    border-radius: var(--radius-pill);
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  .badge--pending { background-color: var(--tint-pending); color: var(--turmeric-500); }
+  .badge--accepted { background-color: var(--tint-accepted); color: var(--moss-600); }
+  .badge--completed { background-color: var(--tint-completed); color: var(--teal-900); }
+  .badge--rejected { background-color: var(--tint-rejected); color: var(--clay-600); }
+  .badge--cancelled { background-color: var(--tint-cancelled); color: var(--ink-soft); }
+
+  /* Signature Motif 3: Rubber Stamps */
+  .stamp {
+    display: inline-block;
+    padding: 4px 12px;
+    border: 2px double currentColor;
+    font-family: var(--font-mono);
+    font-size: 0.875rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    transform: rotate(-3deg);
+    opacity: 0.9;
+  }
+
+  .stamp--verified, .stamp--paid {
+    color: var(--moss-600);
+  }
+
+  .stamp--rejected {
+    color: var(--clay-600);
+  }
+}

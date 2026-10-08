@@ -1,0 +1,94 @@
+@layer components {
+  /* Signature Motif 1: Work-order tickets */
+  .ticket {
+    background-color: var(--surface);
+    border: var(--border-thin);
+    position: relative;
+    box-shadow: 2px 2px 0 var(--line);
+    transition: box-shadow var(--duration-fast) var(--ease-out), transform var(--duration-fast);
+  }
+
+  @media (hover: hover) {
+    .ticket:hover {
+      transform: translate(-2px, -2px);
+      box-shadow: var(--shadow-hard);
+    }
+  }
+
+  /* The top header of the ticket */
+  .ticket__header {
+    padding: var(--space-4);
+    border-bottom: 2px dashed var(--line);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: relative;
+  }
+
+  /* Notch cut-outs fake the perforation */
+  .ticket__header::before,
+  .ticket__header::after {
+    content: '';
+    position: absolute;
+    bottom: -8px; /* Half of height to center on the dashed line */
+    width: 16px;
+    height: 16px;
+    background-color: var(--paper); /* Match page background to look transparent */
+    border: var(--border-thin);
+    border-radius: 50%;
+    z-index: 1;
+  }
+
+  .ticket__header::before {
+    left: -9px;
+    border-right-color: transparent;
+    border-bottom-color: transparent;
+    transform: rotate(-45deg);
+  }
+
+  .ticket__header::after {
+    right: -9px;
+    border-left-color: transparent;
+    border-bottom-color: transparent;
+    transform: rotate(45deg);
+  }
+
+  /* Mono booking ID */
+  .ticket__id {
+    font-family: var(--font-mono);
+    font-weight: 600;
+    color: var(--ink-soft);
+    font-size: 0.875rem;
+  }
+
+  /* Main body */
+  .ticket__body {
+    padding: var(--space-4);
+  }
+
+  .ticket__row {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: var(--space-2);
+  }
+
+  .ticket__label {
+    color: var(--ink-soft);
+    font-size: 0.875rem;
+  }
+
+  .ticket__value {
+    font-weight: 600;
+    text-align: right;
+  }
+
+  /* Footer actions */
+  .ticket__footer {
+    padding: var(--space-4);
+    background-color: var(--paper-sunk);
+    border-top: var(--border-thin);
+    display: flex;
+    justify-content: flex-end;
+    gap: var(--space-4);
+  }
+}

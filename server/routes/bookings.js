@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const Booking = require('../models/Booking');
-const Worker = require('../models/Worker');
+const User = require('../models/User');
 const VerificationRequest = require('../models/VerificationRequest');
 const Notification = require('../models/Notification');
 
@@ -73,9 +73,20 @@ router.get('/dashboard/:workerId', async (req, res) => {
             rating = (totalRating / ratedBookings.length).toFixed(1);
         }
 
+        // 4. Pending Requests Count
+        const pendingRequests = await Booking.countDocuments({
+            workerId: workerId,
+            status: 'Pending'
+        });
+
+        // 5. Profile Picture
+        const worker = await User.findOne({ workerId }).select('profilePic');
+
         res.json({
             jobsDone,
-            rating
+            rating,
+            pendingRequests,
+            profilePic: worker ? worker.profilePic : null
         });
 
     } catch (err) {
@@ -105,7 +116,7 @@ router.get('/client/:email', async (req, res) => {
         if (missingIds.length > 0) {
             const [verDocs, wrkDocs] = await Promise.all([
                 VerificationRequest.find({ workerId: { $in: missingIds } }).select('workerId name mobile profilePhotoData').lean(),
-                Worker.find({ workerId: { $in: missingIds } }).select('workerId name mobile').lean()
+                User.find({ workerId: { $in: missingIds }, role: 'professional' }).select('workerId name mobile').lean()
             ]);
             const wMap = {};
             wrkDocs.forEach(w => { wMap[w.workerId] = w; });
@@ -189,7 +200,7 @@ router.put('/:id', async (req, res) => {
                 }
 
                 // Update the Worker document
-                await Worker.findOneAndUpdate(
+                await User.findOneAndUpdate(
                     { workerId: booking.workerId },
                     {
                         $set: {
@@ -227,7 +238,7 @@ router.get('/all', async (req, res) => {
         if (missingIds.length > 0) {
             const [verDocs, wrkDocs] = await Promise.all([
                 VerificationRequest.find({ workerId: { $in: missingIds } }).select('workerId name mobile').lean(),
-                Worker.find({ workerId: { $in: missingIds } }).select('workerId name mobile').lean()
+                User.find({ workerId: { $in: missingIds }, role: 'professional' }).select('workerId name mobile').lean()
             ]);
             const wMap = {};
             wrkDocs.forEach(w => { wMap[w.workerId] = w; });
@@ -251,7 +262,7 @@ router.get('/all', async (req, res) => {
 // Get all workers with ratings for Admin Dashboard
 router.get('/workers-ratings', async (req, res) => {
     try {
-        const workers = await Worker.find().lean();
+        const workers = await User.find({ role: 'professional' }).lean();
         const completedBookings = await Booking.find({ status: 'Completed' }).lean();
 
         // Calculate ratings per worker
@@ -270,15 +281,20 @@ router.get('/workers-ratings', async (req, res) => {
         // Bulk fetch all verification photos at once (instead of 1 query per worker)
         const verifiedIds = workers.filter(w => w.isVerified).map(w => w.workerId);
         const verPhotoMap = {};
+        const verCityMap = {};
         if (verifiedIds.length > 0) {
             const verDocs = await VerificationRequest.find({ workerId: { $in: verifiedIds } })
-                .select('workerId profilePhotoData').lean();
-            verDocs.forEach(v => { verPhotoMap[v.workerId] = v.profilePhotoData; });
+                .select('workerId profilePhotoData city').lean();
+            verDocs.forEach(v => { 
+                verPhotoMap[v.workerId] = v.profilePhotoData; 
+                verCityMap[v.workerId] = v.city;
+            });
         }
 
         const enrichedWorkers = workers.map(worker => {
             const stats = workerStats[worker.workerId] || { totalRating: 0, count: 0 };
             const avgRating = stats.count > 0 ? (stats.totalRating / stats.count).toFixed(1) : 'N/A';
+            const city = verCityMap[worker.workerId] || (worker.address && worker.address.city) || '';
 
             return {
                 _id: worker._id,
@@ -286,6 +302,7 @@ router.get('/workers-ratings', async (req, res) => {
                 name: worker.name,
                 email: worker.email,
                 profession: worker.profession || 'Professional',
+                city: city,
                 rating: avgRating,
                 jobsDone: stats.count,
                 profilePhoto: verPhotoMap[worker.workerId] || null,

@@ -1,0 +1,43 @@
+@layer layout {
+  .l-container {
+    width: 100%;
+    max-width: var(--max-w);
+    margin-inline: auto;
+    padding-inline: var(--space-4);
+  }
+  
+  @media (min-width: 768px) {
+    .l-container {
+      padding-inline: var(--space-8);
+    }
+  }
+  
+  .l-grid {
+    display: grid;
+    gap: var(--space-6);
+  }
+  
+  /* Auto-fit grid for responsive tiles */
+  .l-grid--auto {
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 16rem), 1fr));
+  }
+  
+  .l-flex {
+    display: flex;
+    gap: var(--space-4);
+  }
+  
+  .l-flex--col {
+    flex-direction: column;
+  }
+  
+  .l-flex--center {
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .l-flex--between {
+    align-items: center;
+    justify-content: space-between;
+  }
+}
